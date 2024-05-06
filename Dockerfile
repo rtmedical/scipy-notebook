@@ -57,7 +57,7 @@ RUN cd /tmp && \
     git checkout 1.9.4 && \
     mkdir build && cd build && \
     cmake -DINSTALL_PREFIX=/usr .. && \
-    make && \
+    make -j$(nproc) && \
     make install
 
 RUN cp /tmp/plastimatch/build/plastimatch /usr/bin
