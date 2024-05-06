@@ -82,13 +82,22 @@ RUN apt-get update && apt-get install -y \
 
 ### plastimatch
 RUN cd /tmp && \
-    git clone https://gitlab.com/plastimatch/plastimatch.git && \
-    cd plastimatch && \
-    git checkout 1.9.4 && \
+    git clone https://gitlab.com/plastimatch/plastimatch.git
+
+RUN cd /tmp/plastimatch && \
+    git checkout 1.9.4
+
+RUN cd /tmp/plastimatch && \
     mkdir build && cd build && \
-    cmake -DINSTALL_PREFIX=/usr .. && \
-    make && make install && \
-    cp plastimatch /usr/bin
+    cmake -DINSTALL_PREFIX=/usr ..
+
+RUN cd /tmp/plastimatch/build && \
+    make
+
+RUN cd /tmp/plastimatch/build && \
+    make install
+
+RUN cp /tmp/plastimatch/build/plastimatch /usr/bin
 
 
 RUN git clone https://github.com/DCMTK/dcmtk.git && \
