@@ -72,10 +72,21 @@ RUN git clone https://github.com/DCMTK/dcmtk.git && \
     make -j8 && \
     make DESTDIR=../dcmtk-3.6.4-install install
 
-# Copy binaries to /usr/bin
-RUN cp /usr/src/dcmtk-3.6.4-install/usr/local/bin/* /usr/bin/ 
-RUN mkdir /usr/local/share/dcmtk
-RUN cp -r /usr/src/dcmtk-3.6.4-install/usr/local/share/dcmtk/* /usr/local/share/dcmtk
+
+# Verify the contents of the DCMTK install directory
+RUN ls -la /usr/src/dcmtk-3.6.4-install/usr/local/bin/
+
+# Copy binaries to /usr/bin if they exist
+RUN if [ "$(ls -A /usr/src/dcmtk-3.6.4-install/usr/local/bin/)" ]; then \
+        cp /usr/src/dcmtk-3.6.4-install/usr/local/bin/* /usr/bin/; \
+    else \
+        echo "No binaries to copy"; \
+    fi
+
+# Create and copy DCMTK share directory
+RUN mkdir -p /usr/local/share/dcmtk && \
+    cp -r /usr/src/dcmtk-3.6.4-install/usr/local/share/dcmtk/* /usr/local/share/dcmtk/
+
 
 ### Plastimatch installation
 RUN cd /tmp && \
