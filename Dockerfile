@@ -29,28 +29,24 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 
-# Clone, build, and install DCMTK
+# Clone and build DCMTK
 RUN mkdir -p /usr/src/dcmtk-build && \
     cd /usr/src && \
     git clone https://github.com/DCMTK/dcmtk.git && \
     cd dcmtk-build && \
     cmake ../dcmtk && \
-    make && \
-    make DESTDIR=/usr/src/dcmtk-install install
+    make -j$(nproc)
 
-# Verify the contents of the DCMTK install directory
-RUN ls -la /usr/src/dcmtk-install/usr/local/bin/
+# Install DCMTK binaries to the default system paths
+RUN cd /usr/src/dcmtk-build && \
+    make install
 
-# Copy binaries to /usr/bin if they exist
-RUN if [ "$(ls -A /usr/src/dcmtk-install/usr/local/bin/)" ]; then \
-        cp /usr/src/dcmtk-install/usr/local/bin/* /usr/bin/; \
-    else \
-        echo "No binaries to copy"; \
-    fi
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /usr/src/*
 
-# Create and copy DCMTK share directory
-RUN mkdir -p /usr/local/share/dcmtk && \
-    cp -r /usr/src/dcmtk-install/usr/local/share/dcmtk/* /usr/local/share/dcmtk/
+# Verify DCMTK installation
+RUN which dcm2xml && dcm2xml --version
 
 
 
