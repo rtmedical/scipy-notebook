@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
     libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libopenexr-dev \
     g++ make git cmake-curses-gui libblas-dev liblapack-dev libsqlite3-dev \
-    libdcmtk-dev libdlib-dev libfftw3-dev libgdcm2-dev libinsighttoolkit4-dev \
+    libdcmtk-dev libdlib-dev libfftw3-dev libinsighttoolkit4-dev \
     uuid-dev zlib1g-dev build-essential imagemagick && \
     rm -rf /var/lib/apt/lists/*
 
