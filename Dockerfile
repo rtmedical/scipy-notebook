@@ -15,6 +15,58 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 
+
+# System and additional dependencies installation
+RUN apt-get update && apt-get install -y \
+    cmake git zlib1g-dev libtiff-dev libpng-dev libjpeg-dev \
+    libssl-dev libwrap0-dev \
+    vtk-dicom-tools libgdcm-tools libvtkgdcm-tools \
+    dcmtk libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev \
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libopenexr-dev \
+    g++ make cmake-curses-gui libblas-dev liblapack-dev libsqlite3-dev \
+    libdcmtk-dev libdlib-dev libfftw3-dev libinsighttoolkit4-dev \
+    uuid-dev build-essential imagemagick && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# Clone, build, and install DCMTK
+RUN mkdir -p /usr/src/dcmtk-build && \
+    cd /usr/src && \
+    git clone https://github.com/DCMTK/dcmtk.git && \
+    cd dcmtk-build && \
+    cmake ../dcmtk && \
+    make && \
+    make DESTDIR=/usr/src/dcmtk-install install
+
+# Verify the contents of the DCMTK install directory
+RUN ls -la /usr/src/dcmtk-install/usr/local/bin/
+
+# Copy binaries to /usr/bin if they exist
+RUN if [ "$(ls -A /usr/src/dcmtk-install/usr/local/bin/)" ]; then \
+        cp /usr/src/dcmtk-install/usr/local/bin/* /usr/bin/; \
+    else \
+        echo "No binaries to copy"; \
+    fi
+
+# Create and copy DCMTK share directory
+RUN mkdir -p /usr/local/share/dcmtk && \
+    cp -r /usr/src/dcmtk-install/usr/local/share/dcmtk/* /usr/local/share/dcmtk/
+
+
+
+### Plastimatch installation
+RUN cd /tmp && \
+    git clone https://gitlab.com/plastimatch/plastimatch.git && \
+    cd plastimatch && \
+    git checkout 1.9.4 && \
+    mkdir build && cd build && \
+    cmake -DINSTALL_PREFIX=/usr .. && \
+    make && \
+    make install
+
+RUN cp /tmp/plastimatch/build/plastimatch /usr/bin
+
+
 # Installation of PyTorch using pip
 # Reference: https://pytorch.org/get-started/locally/
 # Ignore pip install warning
@@ -47,58 +99,6 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 
 ### END RUST
 
-# System dependency installation
-RUN apt-get update && apt-get install -y \
-    cmake git zlib1g-dev libtiff-dev libpng-dev libjpeg-dev \
-    libssl-dev libwrap0-dev \
-    vtk-dicom-tools libgdcm-tools libvtkgdcm-tools && \
-    rm -rf /var/lib/apt/lists/*
-
-# Additional dependencies installation
-RUN apt-get update && apt-get install -y \
-    dcmtk libgdcm-tools libvtkgdcm-tools cmake \
-    libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev \
-    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libopenexr-dev \
-    g++ make git cmake-curses-gui libblas-dev liblapack-dev libsqlite3-dev \
-    libdcmtk-dev libdlib-dev libfftw3-dev libinsighttoolkit4-dev \
-    uuid-dev zlib1g-dev build-essential imagemagick && \
-    rm -rf /var/lib/apt/lists/*
-
-# Clone, build, and install DCMTK
-RUN git clone https://github.com/DCMTK/dcmtk.git && \
-    mkdir dcmtk-3.6.4-build && \
-    cd dcmtk-3.6.4-build && \
-    cmake ../dcmtk && \
-    make -j8 && \
-    make DESTDIR=../dcmtk-3.6.4-install install
-
-
-# Verify the contents of the DCMTK install directory
-RUN ls -la /usr/src/dcmtk-3.6.4-install/usr/local/bin/
-
-# Copy binaries to /usr/bin if they exist
-RUN if [ "$(ls -A /usr/src/dcmtk-3.6.4-install/usr/local/bin/)" ]; then \
-        cp /usr/src/dcmtk-3.6.4-install/usr/local/bin/* /usr/bin/; \
-    else \
-        echo "No binaries to copy"; \
-    fi
-
-# Create and copy DCMTK share directory
-RUN mkdir -p /usr/local/share/dcmtk && \
-    cp -r /usr/src/dcmtk-3.6.4-install/usr/local/share/dcmtk/* /usr/local/share/dcmtk/
-
-
-### Plastimatch installation
-RUN cd /tmp && \
-    git clone https://gitlab.com/plastimatch/plastimatch.git && \
-    cd plastimatch && \
-    git checkout 1.9.4 && \
-    mkdir build && cd build && \
-    cmake -DINSTALL_PREFIX=/usr .. && \
-    make && \
-    make install
-
-RUN cp /tmp/plastimatch/build/plastimatch /usr/bin
 
 # Install OpenCV and SimpleITK
 RUN pip install opencv-python-headless SimpleITK
