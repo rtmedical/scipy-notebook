@@ -1,0 +1,11 @@
+version: '2'
+services:
+  notebook:
+    build: .
+    ports:
+      - '1515:8888'
+    volumes:
+      - ./notebook:/home/jovyan/work
+      - /mnt:/mnt    
+volumes:
+  db:
