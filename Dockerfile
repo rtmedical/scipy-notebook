@@ -105,4 +105,10 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 # Install OpenCV and SimpleITK
 RUN pip install opencv-python-headless SimpleITK
 
+RUN chown -R jovyan:jovyan /home/jovyan/.local && \
+    chmod -R 775 /home/jovyan/.local
+
+USER jovyan
+
+
 CMD ["jupyter", "notebook", "--no-browser","--NotebookApp.token=''","--NotebookApp.password=''","--NotebookApp.iopub_data_rate_limit=1e10"]
