@@ -105,11 +105,7 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 # Install OpenCV and SimpleITK
 RUN pip install opencv-python-headless SimpleITK
 
-RUN apt-get update && \
-    apt-get install -y git sudo
-
-# Adicionar usuário jovyan e grupo jovyan
-RUN groupadd -r jovyan && useradd -r -g jovyan -m jovyan -s /bin/bash
+RUN comod 777 -R /home/jovyan
 
 # Mudar para o diretório do usuário
 WORKDIR /home/jovyan
@@ -119,4 +115,4 @@ WORKDIR /home/jovyan
 USER jovyan
 
 
-CMD ["jupyter", "notebook", "--no-browser","--NotebookApp.token=''","--NotebookApp.password=''","--NotebookApp.iopub_data_rate_limit=1e10"]
+CMD ["jupyter", "notebook","--allow-root", "--no-browser","--NotebookApp.token=''","--NotebookApp.password=''","--NotebookApp.iopub_data_rate_limit=1e10"]
