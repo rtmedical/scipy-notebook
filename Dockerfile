@@ -6,6 +6,10 @@ ARG OWNER=jupyter
 ARG BASE_CONTAINER=$REGISTRY/$OWNER/scipy-notebook
 FROM $BASE_CONTAINER
 
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
 ARG CONDA_DIR=/opt/conda
 ARG NB_USER=jovyan
 
@@ -27,8 +31,21 @@ RUN apt-get update && apt-get install -y \
     libdcmtk-dev libdlib-dev libfftw3-dev libinsighttoolkit4-dev \
     uuid-dev build-essential imagemagick && \
     rm -rf /var/lib/apt/lists/*
+RUN echo "start plastimatch install" 
+# Adiciona chaves GPG
+RUN apt-get update && \
+    apt-get install -y gnupg && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138 && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
 
+# Adiciona o repositório do Debian Bookworm
+RUN echo "deb http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list
 
+# Atualiza o sistema e instala o Plastimatch
+RUN apt-get update && \
+    apt-get install -y libcharls2 plastimatch
+RUN echo "end plastimatch install" 
 # Clone and build DCMTK
 RUN mkdir -p /usr/src/dcmtk-build && \
     cd /usr/src && \
