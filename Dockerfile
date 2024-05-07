@@ -114,10 +114,7 @@ RUN groupadd -r jovyan && useradd -r -g jovyan -m jovyan -s /bin/bash
 # Mudar para o diretório do usuário
 WORKDIR /home/jovyan
 
-# Criar diretório .local e ajustar as permissões
-RUN mkdir -p /home/jovyan/.local && \
-    chown -R jovyan:jovyan /home/jovyan/.local && \
-    chmod -R 775 /home/jovyan/.local
+
 
 USER jovyan
 
