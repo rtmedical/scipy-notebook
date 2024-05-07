@@ -105,7 +105,7 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 # Install OpenCV and SimpleITK
 RUN pip install opencv-python-headless SimpleITK
 
-RUN comod 777 -R /home/jovyan
+RUN chmod 777 -R /home/jovyan/
 
 # Mudar para o diretório do usuário
 WORKDIR /home/jovyan
