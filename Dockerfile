@@ -105,7 +105,18 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 # Install OpenCV and SimpleITK
 RUN pip install opencv-python-headless SimpleITK
 
-RUN chown -R jovyan:jovyan /home/jovyan/.local && \
+RUN apt-get update && \
+    apt-get install -y git sudo
+
+# Adicionar usuário jovyan e grupo jovyan
+RUN groupadd -r jovyan && useradd -r -g jovyan -m jovyan -s /bin/bash
+
+# Mudar para o diretório do usuário
+WORKDIR /home/jovyan
+
+# Criar diretório .local e ajustar as permissões
+RUN mkdir -p /home/jovyan/.local && \
+    chown -R jovyan:jovyan /home/jovyan/.local && \
     chmod -R 775 /home/jovyan/.local
 
 USER jovyan
