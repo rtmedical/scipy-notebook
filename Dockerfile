@@ -44,6 +44,11 @@ RUN echo "deb http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.li
 RUN apt-get update && \
     apt-get install -y libcharls2 plastimatch
 RUN echo "end plastimatch install" 
+
+
+# Verify Plastimatch installation
+RUN which plastimatch && plastimatch --version
+
 # Clone and build DCMTK
 RUN mkdir -p /usr/src/dcmtk-build && \
     cd /usr/src && \
@@ -62,36 +67,8 @@ RUN apt-get clean && \
 
 # Verify DCMTK installation
 RUN which dcm2xml && dcm2xml --version
-
-
-
-### Plastimatch installation
-
-# Clone and build Plastimatch
-RUN mkdir -p /usr/src/plastimatch-build && \
-    cd /usr/src && \
-    git clone https://gitlab.com/plastimatch/plastimatch.git && \
-    cd plastimatch && \
-    git checkout 1.9.4 && \
-    mkdir build && \
-    cd build && \
-    # Configure to install in a custom directory under /usr/src
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/src/plastimatch-install .. && \
-    make -j$(nproc)
-
-# Install Plastimatch binaries to the custom directory and then copy to system paths
-RUN cd /usr/src/plastimatch/build && \
-    make install && \
-    cp -a /usr/src/plastimatch-install/usr/local/bin/* /usr/local/bin/ && \
-    cp -a /usr/src/plastimatch-install/usr/local/lib/* /usr/local/lib/
-
-# Clean up
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /usr/src/plastimatch* /usr/src/plastimatch-build
-
-# Verify Plastimatch installation
-RUN which plastimatch && plastimatch --version
-
+ 
+ 
 # Installation of PyTorch using pip
 # Reference: https://pytorch.org/get-started/locally/
 # Ignore pip install warning
